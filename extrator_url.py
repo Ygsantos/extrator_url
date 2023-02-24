@@ -1,40 +1,79 @@
-class extrator_url:
-    def __init__(self,url): #        """Salva a url em um atributo do objeto (self.url = url) e verifica se a url é válida"""
+import re
+
+
+class ExtratorURL:
+    def __init__(self, url):
         self.url = self.sanitiza_url(url)
         self.valida_url()
 
+    def sanitiza_url(self, url):
+        if type(url) == str:
+            return url.strip()
+        else:
+            return ""
 
-    def sanitiza_url(self,url): #        """Retorna a url removendo espaços em branco."""
-        return url.strip()
+    def valida_url(self):
+        if not self.url:
+            raise ValueError("A URL está vazia")
 
-    def valida_url(self): #        """Valida se a url está vazia"""
-        if self.url == '':
-            raise ValueError('A URL NAO É VALIDA ')
+        padrao_url = re.compile('(http(s)?://)?(www.)?bytebank.com(.br)?/cambio')
+        match = padrao_url.match(url)
+        if not match:
+            raise ValueError("A URL não é válida.")
 
-    def get_url_base(self): #        """Retorna a base da url."""
+    def get_url_base(self):
         indice_interrogacao = self.url.find('?')
         url_base = self.url[:indice_interrogacao]
         return url_base
 
-    def get_url_parametros(self): #        """Retorna os parâmetros da url."""
+    def get_url_parametros(self):
         indice_interrogacao = self.url.find('?')
-        url_parametro = self.url[indice_interrogacao +1:]
-        return url_parametro
+        url_parametros = self.url[indice_interrogacao + 1:]
+        return url_parametros
 
-    def get_valor_parametro(self, nome_parametro): #        """Retorna os parâmetros da url."""
-        indice_parametro = self.get_url_parametros().find(nome_parametro)
-        indice_valor = indice_parametro + len(nome_parametro) +1
-        indice_e_comercial = self.get_url_parametros().find('&',indice_valor)
+    def get_valor_parametro(self, parametro_busca):
+        indice_parametro = self.get_url_parametros().find(parametro_busca)
+        indice_valor = indice_parametro + len(parametro_busca) + 1
+        indice_e_comercial = self.get_url_parametros().find('&', indice_valor)
         if indice_e_comercial == -1:
             valor = self.get_url_parametros()[indice_valor:]
         else:
             valor = self.get_url_parametros()[indice_valor:indice_e_comercial]
+        return valor
 
-        return  valor
+    def __len__(self):
+        return len(self.url)
+
+    def __str__(self):
+        return self.url + "\n" + "Parâmetros: " + self.get_url_parametros() + "\n" + "URL Base: " + self.get_url_base()
+
+    def __eq__(self, other):
+        return self.url == other.url
+
 
 url = "bytebank.com/cambio?quantidade=100&moedaOrigem=real&moedaDestino=dolar"
-extrator_url = extrator_url(url)
+extrator_url = ExtratorURL(url)
+extrator_url_2 = ExtratorURL(url)
+
+print("O tamanho da URL é: ", len(extrator_url))
+print("URL completa: ", extrator_url)
+
+# Verifica que duas instâncias com a mesma URL são iguais
+print("extrator_url == extrator_url_2? ", extrator_url == extrator_url_2)
+
+# Busca o valor do parâmetro quantidade
 valor_quantidade = extrator_url.get_valor_parametro("quantidade")
-print(valor_quantidade)
+print("Valor do parâmetro 'quantidade': ", valor_quantidade)
+
+endereco = "Rua da Flores 72, apartamento 1002, Laranjeiras, Rio de Janeiro, RJ, 23440-120"
 
 
+import re  # Regular Expression -- RegEx
+
+# 5 dígitos + hífen (opcional) + 3 dígitos
+
+padrao = re.compile("[0-9]{5}[-]{0,1}[0-9]{3}")
+busca = padrao.search(endereco)  # Match
+if busca:
+    cep = busca.group()
+    print(cep)
